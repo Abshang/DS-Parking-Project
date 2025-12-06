@@ -1,9 +1,7 @@
-// File: QueueLL.h
-// Description: Defines Queue class using LinkedList.
+// QueueLL.h
 
 #pragma once
 #include "LinkedList.h"
-#include "Node.h"
 
 class QueueLL
 {
@@ -11,9 +9,19 @@ private:
     LinkedList list;
 
 public:
-    QueueLL();
-    ~QueueLL();
-    void enqueue(Car *car);
-    Car *dequeue();
-    bool isEmpty();
+    QueueLL() = default;
+    ~QueueLL() = default;
+
+    QueueLL(const QueueLL &) = delete;
+    QueueLL &operator=(const QueueLL &) = delete;
+
+    void enqueue(Car *car); // O(1)
+    Car *dequeue();         // O(1)
+
+    Car *front() const; // O(1)
+
+    bool isEmpty() const;
+    int getSize() const;
+
+    void print(const std::string &title = "") const;
 };
