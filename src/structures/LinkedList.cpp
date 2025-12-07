@@ -1,19 +1,21 @@
 // structures/LinkedList.cpp
-#include "structures/LinkedList.h"
+#include "LinkedList.h"
 #include <iostream>
 
+// O(1)
 LinkedList::LinkedList() : head(nullptr), tail(nullptr), size(0) {}
 
+// O(n) - Destructor: Calls clear() to delete all nodes. n = list size.
 LinkedList::~LinkedList()
 {
-    clear(); // فقط Nodeها رو حذف می‌کنه، چون Carها مالکیتشون منتقل شده
-    // دیگه delete car نمی‌کنیم → از double delete جلوگیری شد
+    clear();
 }
 
+// O(1) - Adds a node to the end of the list (Used for Queue enqueue).
 void LinkedList::pushBack(Car *car)
 {
     if (!car)
-        return; // ایمنی
+        return;
 
     Node *newNode = new Node(car);
     newNode->next = nullptr;
@@ -30,6 +32,7 @@ void LinkedList::pushBack(Car *car)
     ++size;
 }
 
+// O(1) - Adds a node to the front of the list (Used for Stack push and Queue enqueueFront).
 void LinkedList::pushFront(Car *car)
 {
     if (!car)
@@ -39,18 +42,19 @@ void LinkedList::pushFront(Car *car)
     newNode->next = head;
     head = newNode;
     if (!tail)
-        tail = newNode; // اگر لیست خالی بود
+        tail = newNode;
     ++size;
 }
 
+// O(1) - Removes and returns the car from the front (Used for Stack pop and Queue dequeue).
 Car *LinkedList::popFront()
 {
     if (isEmpty())
         return nullptr;
 
     Node *tmp = head;
-    Car *car = tmp->car; // مالکیت منتقل میشه
-    tmp->car = nullptr;  // مهم! برای جلوگیری از delete در clear
+    Car *car = tmp->car;
+    tmp->car = nullptr;
 
     head = head->next;
     if (!head)
@@ -61,14 +65,19 @@ Car *LinkedList::popFront()
     return car;
 }
 
+// O(1) - Checks if the list is empty.
 bool LinkedList::isEmpty() const { return head == nullptr; }
+
+// O(1) - Returns the current size.
 int LinkedList::getSize() const { return size; }
 
+// O(1) - Returns the car at the front without removal.
 Car *LinkedList::getFront() const
 {
     return head ? head->car : nullptr;
 }
 
+// O(n) - Searches for a car by ID. n = list size.
 int LinkedList::findPosition(const std::string &carId) const
 {
     Node *current = head;
@@ -83,7 +92,7 @@ int LinkedList::findPosition(const std::string &carId) const
     return -1;
 }
 
-// ایمن شده در برابر car == nullptr
+// O(n) - Merges two sorted lists. n = total nodes in left + right.
 Node *LinkedList::merge(Node *left, Node *right)
 {
     if (!left)
@@ -91,7 +100,6 @@ Node *LinkedList::merge(Node *left, Node *right)
     if (!right)
         return left;
 
-    // ایمنی: اگر car حذف شده یا nullptr بود
     std::string leftId = left->car ? left->car->getId() : "";
     std::string rightId = right->car ? right->car->getId() : "";
 
@@ -107,6 +115,7 @@ Node *LinkedList::merge(Node *left, Node *right)
     }
 }
 
+// O(n) - Splits the list into two halves using the fast/slow pointer technique. n = source size.
 void LinkedList::split(Node *source, Node *&left, Node *&right)
 {
     if (!source || !source->next)
@@ -134,6 +143,7 @@ void LinkedList::split(Node *source, Node *&left, Node *&right)
     slow->next = nullptr;
 }
 
+// O(n log n) - Recursive core of Merge Sort. n = current list size.
 void LinkedList::mergeSortHelper(Node *&headRef)
 {
     if (!headRef || !headRef->next)
@@ -149,20 +159,20 @@ void LinkedList::mergeSortHelper(Node *&headRef)
     headRef = merge(left, right);
 }
 
+// O(n log n) - Public method to start the Merge Sort.
 void LinkedList::mergeSort()
 {
     mergeSortHelper(head);
 
-    // بازسازی tail
     tail = head;
     if (tail)
     {
         while (tail->next)
             tail = tail->next;
     }
-    // اگر لیست خالی شد، tail باید nullptr باشه → الان هست
 }
 
+// O(n) - Displays list contents (for debugging/status). n = list size.
 void LinkedList::printList() const
 {
     if (isEmpty())
@@ -187,14 +197,13 @@ void LinkedList::printList() const
     std::cout << " -> Bottom" << std::endl;
 }
 
+// O(n) - Deletes all nodes and their associated Car objects (Crucial for memory management). n = list size.
 void LinkedList::clear()
 {
     Node *cur = head;
     while (cur)
     {
         Node *next = cur->next;
-        // car رو حذف نمی‌کنیم چون مالکیت منتقل شده
-        // فقط اگه هنوز اشاره‌گر داره و نمی‌خوایم، می‌تونیم nullptr کنیم
         cur->car = nullptr;
         delete cur;
         cur = next;

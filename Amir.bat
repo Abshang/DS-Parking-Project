@@ -10,10 +10,10 @@ echo      Email: amir.greav@gmail.com
 echo ==================================================
 echo.
 
-git config user.name "Amir Gholami"
+git config user.name "Amir Grivani"
 git config user.email "amir.greav@gmail.com"
 
-echo Git identity switched to Amir Gholami successfully!
+echo Git identity switched to Amir Grivani successfully!
 echo.
 echo Now run these commands (one by one):
 echo.

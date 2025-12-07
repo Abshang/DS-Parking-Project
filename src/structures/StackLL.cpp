@@ -18,7 +18,7 @@ bool StackLL::push(Car *car)
         std::cout << "Lane " << laneId << " is FULL (" << capacity << " cars)\n";
         return false;
     }
-    list.pushFront(car); // مالکیت به Stack منتقل شد
+    list.pushFront(car); 
     return true;
 }
 
@@ -27,7 +27,7 @@ Car *StackLL::pop()
     Car *car = list.popFront();
     if (!car)
         std::cout << "Lane " << laneId << " is EMPTY\n";
-    return car; // مالکیت منتقل شد به caller
+    return car; 
 }
 
 Car *StackLL::peek() const
@@ -69,13 +69,12 @@ void StackLL::print(const std::string &title) const
 
 void StackLL::clear()
 {
-    // حذف همه Carها (چون متعلق به این Stack هستن)
     Node *current = list.getHead();
     while (current)
     {
-        delete current->car; // Car واقعی حذف میشه
+        delete current->car; 
         current->car = nullptr;
         current = current->next;
     }
-    list.clear(); // فقط Nodeها رو پاک می‌کنه
+    list.clear(); 
 }

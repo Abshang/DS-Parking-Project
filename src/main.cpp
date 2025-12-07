@@ -1,90 +1,109 @@
-// main.cpp
 #include <iostream>
 #include <string>
+#include "model/Car.h"
+#include "structures/QueueLL.h"
+#include "structures/StackLL.h"
 #include "parking/ParkingLot.h"
 #include "parking/ParkingManager.h"
-#include "structures/QueueLL.h"
 
-using namespace std;
+const int NUM_STACKS = 3;
+const int STACK_CAPACITY = 4;
 
 int main()
 {
-    cout << "=== PARKING LOT SYSTEM - DATA STRUCTURES PROJECT ===\n\n";
-
-    // ساخت پارکینگ: ۳ استک، هر کدام ظرفیت ۴ ماشین
-    ParkingLot parking(3, 4);
     QueueLL entryQueue;
-    ParkingManager manager(&parking, &entryQueue);
 
-    // اضافه کردن ماشین به صف ورودی
-    auto addToQueue = [&](const string &id)
-    {
-        entryQueue.enqueue(new Car(id));
-        cout << "Car " << id << " arrived and added to entry queue.\n";
-    };
+    entryQueue.enqueue(new Car("11A"));
+    entryQueue.enqueue(new Car("22B"));
+    entryQueue.enqueue(new Car("33C"));
+    entryQueue.enqueue(new Car("44D"));
+    entryQueue.enqueue(new Car("55E"));
+    entryQueue.enqueue(new Car("66F"));
+    entryQueue.enqueue(new Car("77G"));
+    entryQueue.enqueue(new Car("100Z"));
+    entryQueue.enqueue(new Car("200Y"));
+    entryQueue.enqueue(new Car("300X"));
 
-    cout << " مرحله ۱: ورود ماشین‌ها به صف\n";
-    addToQueue("A1");
-    addToQueue("B2");
-    addToQueue("C3");
-    addToQueue("D4");
-    addToQueue("E5");
-    addToQueue("F6");
-    addToQueue("G7");
-    addToQueue("H8");
-    addToQueue("I9");
-    addToQueue("J0");
+    ParkingLot parkingLot(NUM_STACKS, STACK_CAPACITY);
+    ParkingManager manager(&parkingLot, &entryQueue);
+
     manager.printStatus();
 
-    cout << "\n مرحله ۲: پارک کردن ماشین‌ها (اولین جای خالی)\n";
-    manager.addCar(); // A1 → Lane 1
-    manager.addCar(); // B2 → Lane 2
-    manager.addCar(); // C3 → Lane 3
-    manager.addCar(); // D4 → Lane 1
-    manager.addCar(); // E5 → Lane 2
-    manager.addCar(); // F6 → Lane 3
-    manager.addCar(); // G7 → Lane 1
-    manager.addCar(); // H8 → Lane 2
+    std::cout << "\n--- TEST: Parking in the First Available Lane (Lane 1, 2, 3) ---\n";
+
+    manager.addCar();
+    manager.addCar();
+
+    manager.addCar();
+    manager.addCar();
+
+    manager.addCar();
+    manager.addCar();
+
     manager.printStatus();
 
-    cout << "\n مرحله ۳: تست پر شدن پارکینگ\n";
-    manager.addCar(); // I9 → باید برگرده به اول صف!
-    manager.addCar(); // J0 → باید برگرده
+    std::cout << "\n--- TEST: Parking in a Specific Lane (Filling Lane 1) ---\n";
+    manager.addCarToStack(1);
+    manager.addCarToStack(1);
+
+    std::cout << "\n--- TEST: Full Stack Check and Return to Queue Front ---\n";
+    manager.addCarToStack(1);
+    manager.addCar();
+
     manager.printStatus();
 
-    cout << "\n مرحله ۴: جستجوی ماشین\n";
-    int lane, pos;
-    manager.findCar("D4", lane, pos);  // باید بگه Lane 1, position 3
-    manager.findCar("F6", lane, pos);  // Lane 3, position 1 (top)
-    manager.findCar("XYZ", lane, pos); // پیدا نشه
+    std::cout << "\n--- TEST: Find Operation ---\n";
+    int stackNum, position;
+    manager.findCar("33C", stackNum, position);
+    manager.findCar("11A", stackNum, position);
+    manager.findCar("500N", stackNum, position);
 
-    cout << "\n مرحله ۵: مرتب‌سازی استک ۱ (با Merge Sort)\n";
+    std::cout << "\n--- TEST: Remove Operation ---\n";
+
+    manager.removeCarFromStack(1, "11A");
+
+    manager.removeCarFromStack(1, "100Z");
+
+    manager.removeCarFromStack(1, "22B");
+
+    manager.printStatus();
+
+    manager.addCarToStack(1);
+    manager.addCarToStack(1);
+
+    std::cout << "\n--- TEST: Sort Lane 1 ---\n";
     manager.sortStack(1);
+
     manager.printStatus();
 
-    cout << "\n مرحله ۶: خروج ماشین (فقط از بالا)\n";
-    manager.removeCarFromStack(1, "A1"); // اشتباه! A1 دیگه بالا نیست
-    manager.removeCarFromStack(1, "G7"); // درست! G7 بالای استک ۱ هست
-    manager.removeCarFromStack(2, "H8"); // درست
-    manager.printStatus();
+    std::cout << "\n--- TEST: Move Lane 1 to Lane 2 (and Overflow to Lane 3) ---\n";
 
-    cout << "\n مرحله ۷: جابه‌جایی استک ۲ → استک ۳ (با حفظ ترتیب!)\n";
-    // استک ۲ الان: [E5, B2] → بعد از جابه‌جایی باید در استک ۳: [B2, E5] بشه!
-    manager.moveStack(2, 3);
-    manager.printStatus();
-
-    cout << "\n مرحله ۸: تست جابه‌جایی وقتی جا کمه (استک ۱ → استک ۲)\n";
-    // استک ۱ الان: [D4, ...] → باید به استک ۲ و بعد ۳ بره
     manager.moveStack(1, 2);
+
     manager.printStatus();
 
-    cout << "\n مرحله ۹: پارک کردن دوباره از صف (بعد از خالی شدن جا)\n";
-    manager.addCar(); // I9 باید پارک بشه
-    manager.addCar(); // J0 هم
+    manager.addCarToStack(2);
+    manager.addCarToStack(3);
+
+    entryQueue.enqueue(new Car("A01"));
+    entryQueue.enqueue(new Car("A02"));
+    entryQueue.enqueue(new Car("A03"));
+    entryQueue.enqueue(new Car("A04"));
+
+    manager.addCarToStack(1);
+    manager.addCarToStack(1);
+    manager.addCarToStack(1);
+    manager.addCarToStack(1);
+
+    std::cout << "\n--- TEST: Move Lane 1 to Lane 3 (Insufficient Space Test) ---\n";
+
+    manager.moveStack(1, 3);
+
     manager.printStatus();
 
-    cout << "\n=== پایان تست - همه چیز کاملاً درست کار کرد! ===\n";
-    cout << "پروژه شما 100% آماده تحویله و قطعاً 20 + نمره اضافه می‌گیرید!\n\n";
+    std::cout << "\n========================================================\n";
+    std::cout << "TEST ENDED. Parking and Entry Queue memory automatically freed.\n";
+    std::cout << "========================================================\n";
 
     return 0;
 }

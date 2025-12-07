@@ -15,11 +15,10 @@ ParkingLot::ParkingLot(int n, int capacity)
 ParkingLot::~ParkingLot()
 {
     for (int i = 0; i < numStacks; ++i)
-        delete stacks[i]; // ~StackLL() فراخوانی میشه → همه Carها حذف میشن
+        delete stacks[i]; 
     delete[] stacks;
 }
 
-// پارک در اولین استک خالی
 bool ParkingLot::parkCarInFirstAvailable(Car *car)
 {
     if (!car)
@@ -29,7 +28,7 @@ bool ParkingLot::parkCarInFirstAvailable(Car *car)
     {
         if (!stacks[i]->isFull())
         {
-            stacks[i]->push(car); // مالکیت به Stack منتقل شد
+            stacks[i]->push(car); 
             std::cout << "Car " << car->getId() << " parked in lane " << stacks[i]->getId() << "\n";
             return true;
         }
@@ -55,12 +54,11 @@ bool ParkingLot::parkCarInSpecificStack(Car *car, int stackId)
         return false;
     }
 
-    stack->push(car); // مالکیت منتقل شد
+    stack->push(car); 
     std::cout << "Car " << car->getId() << " parked in lane " << stackId << "\n";
     return true;
 }
 
-// اصلاح اصلی: حذف ماشین + حذف حافظه!
 bool ParkingLot::removeCarFromStack(int stackId, const std::string &carId)
 {
     if (stackId < 1 || stackId > numStacks)
@@ -85,8 +83,8 @@ bool ParkingLot::removeCarFromStack(int stackId, const std::string &carId)
         return false;
     }
 
-    Car *removedCar = stack->pop(); // مالکیت به ما منتقل شد
-    delete removedCar;              // مهم! حذف حافظه
+    Car *removedCar = stack->pop(); 
+    delete removedCar;              
     std::cout << "Car " << carId << " removed from lane " << stackId << " and memory freed.\n";
     return true;
 }

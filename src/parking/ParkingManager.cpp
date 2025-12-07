@@ -1,14 +1,14 @@
 // File: parking/ParkingManager.cpp
-#include "../parking/ParkingManager.h"
+#include "ParkingManager.h"
 #include <iostream>
 
-// سازنده
+// constructor - O(1)
 ParkingManager::ParkingManager(ParkingLot *pLot, QueueLL *pQueue)
     : lot(pLot), entryQueue(pQueue)
 {
 }
 
-// اضافه کردن ماشین از صف به اولین جای خالی
+// O(n) - Attempts to park a car in the first available lane. n = number of stacks.
 bool ParkingManager::addCar()
 {
     if (entryQueue->isEmpty())
@@ -22,7 +22,7 @@ bool ParkingManager::addCar()
     if (!lot->parkCarInFirstAvailable(car))
     {
         std::cout << "Parking Lot is FULL. Returning car " << car->getId() << " to front of queue.\n";
-        entryQueue->enqueueFront(car); // مهم: به اول صف برمی‌گرده!
+        entryQueue->enqueueFront(car);
         return false;
     }
 
@@ -30,7 +30,7 @@ bool ParkingManager::addCar()
     return true;
 }
 
-// اضافه کردن ماشین به استک مشخص
+// O(1) - Attempts to park a car in a specific lane.
 bool ParkingManager::addCarToStack(int stackId)
 {
     if (entryQueue->isEmpty())
@@ -44,7 +44,7 @@ bool ParkingManager::addCarToStack(int stackId)
     if (!lot->parkCarInSpecificStack(car, stackId))
     {
         std::cout << "Cannot park in lane " << stackId << ". Returning car to front of queue.\n";
-        entryQueue->enqueueFront(car); // به اول صف!
+        entryQueue->enqueueFront(car);
         return false;
     }
 
@@ -52,7 +52,7 @@ bool ParkingManager::addCarToStack(int stackId)
     return true;
 }
 
-// خروج ماشین (فقط از بالای استک)
+// O(1) - Removes a car only if it is at the front of the specified stack.
 bool ParkingManager::removeCarFromStack(int stackId, const std::string &carId)
 {
     if (!lot->removeCarFromStack(stackId, carId))
@@ -64,7 +64,7 @@ bool ParkingManager::removeCarFromStack(int stackId, const std::string &carId)
     return true;
 }
 
-// جستجوی ماشین
+// O(n * m) - Finds a car in the entire parking lot. n=numStacks, m=stackCapacity.
 bool ParkingManager::findCar(const std::string &carId, int &stackNum, int &position)
 {
     if (!lot->findCar(carId, stackNum, position))
@@ -77,7 +77,7 @@ bool ParkingManager::findCar(const std::string &carId, int &stackNum, int &posit
     return true;
 }
 
-// مرتب‌سازی یک استک
+// O(m log m) - Sorts the contents of a specific stack. m=stackCapacity.
 void ParkingManager::sortStack(int stackId)
 {
     if (stackId < 1 || stackId > lot->getNumStacks())
@@ -89,9 +89,11 @@ void ParkingManager::sortStack(int stackId)
     std::cout << "Lane " << stackId << " sorted successfully using Merge Sort.\n";
 }
 
-// تابع جابه‌جایی — کاملاً درست، بدون برعکس شدن ترتیب!
+// O(n * m) - Moves all cars from stack 'i' to stack 'j' and subsequent stacks, exiting any leftovers.
+// n = number of stacks, m = stack capacity.
 void ParkingManager::moveStack(int fromStackId, int toStackId)
 {
+
     if (fromStackId < 1 || fromStackId > lot->getNumStacks() ||
         toStackId < 1 || toStackId > lot->getNumStacks())
     {
@@ -111,17 +113,15 @@ void ParkingManager::moveStack(int fromStackId, int toStackId)
         return;
     }
 
-    // مرحله ۱: همه ماشین‌ها رو با ترتیب درست (قدیمی → جدید) جمع‌آوری می‌کنیم
     LinkedList carsToMove;
     while (!source->isEmpty())
     {
-        carsToMove.pushBack(source->pop()); // قدیمی‌ترین اول وارد لیست موقت میشه
+        carsToMove.pushBack(source->pop());
     }
+    std::cout << "All cars temporarily moved from lane " << fromStackId << ".\n";
 
-    // مرحله ۲: ماشین‌ها رو به استک مقصد و بعدی‌ها منتقل می‌کنیم
     int targetId = toStackId;
-    Node *current = carsToMove.getHead(); // شروع از قدیمی‌ترین ماشین
-
+    Node *current = carsToMove.getHead();
     while (current != nullptr && targetId <= lot->getNumStacks())
     {
         StackLL *target = lot->getStack(targetId - 1);
@@ -129,34 +129,37 @@ void ParkingManager::moveStack(int fromStackId, int toStackId)
         while (!target->isFull() && current != nullptr)
         {
             Car *car = current->car;
-            current->car = nullptr; // مالکیت منتقل شد
+            current->car = nullptr;
 
-            target->push(car); // push عادی → چون ترتیب درسته، خروجی هم درسته
+            target->push(car);
 
             std::cout << "Car " << car->getId()
                       << " moved from lane " << fromStackId
-                      << " → lane " << targetId << "\n";
+                      << " -> lane " << targetId << "\n";
 
             current = current->next;
         }
         targetId++;
     }
 
-    // اگه جا کم بود
     if (current != nullptr)
     {
-        std::cout << "Not enough space! Remaining cars returned to original stack " << fromStackId << ".\n";
-        // ماشین‌های باقی‌مونده رو برمی‌گردونیم (اختیاری ولی حرفه‌ای)
-        while (current != nullptr)
+        std::cout << "Warning: Not enough space in subsequent lanes. "
+                  << "Remaining cars must **EXIT** the parking lot to ensure lane "
+                  << fromStackId << " is completely empty.\n";
+
+        Node *toDelete = current;
+        while (toDelete != nullptr)
         {
-            source->push(current->car);
-            current->car = nullptr;
-            current = current->next;
+            delete toDelete->car;
+            toDelete->car = nullptr;
+            toDelete = toDelete->next;
         }
     }
-}
 
-// نمایش وضعیت کامل
+    std::cout << "Movement completed. Lane " << fromStackId << " is now empty.\n";
+}
+// O(n * m) - Prints the status of the entire system (Queue + ParkingLot).
 void ParkingManager::printStatus() const
 {
     std::cout << "\n";
