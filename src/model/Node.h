@@ -1,6 +1,4 @@
-// File: Node.h
-// Description: Defines Node for LinkedList. Contains pointer to Car and next Node.
-
+// src/model/Node.h
 #pragma once
 #include "Car.h"
 
@@ -9,5 +7,12 @@ class Node
 public:
     Car *car;
     Node *next;
-    Node(Car *c);
+
+    explicit Node(Car *c = nullptr, Node *n = nullptr)
+        : car(c), next(n) {}
+
+    ~Node() = default;
+
+    Node(const Node &) = delete;
+    Node &operator=(const Node &) = delete;
 };

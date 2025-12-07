@@ -1,12 +1,26 @@
-// File: Car.h
-// Description: Defines Car class with carId. Used in LinkedList, Stack, and Queue.
-
+// model/Car.h
 #pragma once
 #include <string>
 
 class Car
 {
-public:
+private:
     std::string carId;
-    Car(const std::string &id);
+
+public:
+    explicit Car(const std::string &id);
+
+    explicit Car(std::string &&id);
+
+    const std::string &getId() const noexcept { return carId; }
+
+    bool operator<(const Car &other) const noexcept
+    {
+        return carId < other.carId;
+    }
+
+    bool operator==(const Car &other) const noexcept
+    {
+        return carId == other.carId;
+    }
 };

@@ -1,28 +1,23 @@
-// LinkedList.cpp
-#include "LinkedList.h"
+// structures/LinkedList.cpp
+#include "structures/LinkedList.h"
+#include <iostream>
 
 LinkedList::LinkedList() : head(nullptr), tail(nullptr), size(0) {}
 
 LinkedList::~LinkedList()
 {
-
-    Node *cur = head;
-    while (cur)
-    {
-        Node *next = cur->next;
-        delete cur->car;
-        delete cur;
-        cur = next;
-    }
-    head = tail = nullptr;
-    size = 0;
+    clear(); // فقط Nodeها رو حذف می‌کنه، چون Carها مالکیتشون منتقل شده
+    // دیگه delete car نمی‌کنیم → از double delete جلوگیری شد
 }
 
 void LinkedList::pushBack(Car *car)
 {
-    //  O(1)
+    if (!car)
+        return; // ایمنی
+
     Node *newNode = new Node(car);
     newNode->next = nullptr;
+
     if (!head)
     {
         head = tail = newNode;
@@ -35,28 +30,47 @@ void LinkedList::pushBack(Car *car)
     ++size;
 }
 
+void LinkedList::pushFront(Car *car)
+{
+    if (!car)
+        return;
+
+    Node *newNode = new Node(car);
+    newNode->next = head;
+    head = newNode;
+    if (!tail)
+        tail = newNode; // اگر لیست خالی بود
+    ++size;
+}
+
 Car *LinkedList::popFront()
 {
-    // O(1)
-    if (!head)
+    if (isEmpty())
         return nullptr;
+
     Node *tmp = head;
-    Car *car = tmp->car;
+    Car *car = tmp->car; // مالکیت منتقل میشه
+    tmp->car = nullptr;  // مهم! برای جلوگیری از delete در clear
+
     head = head->next;
     if (!head)
         tail = nullptr;
+
     delete tmp;
     --size;
     return car;
 }
 
 bool LinkedList::isEmpty() const { return head == nullptr; }
-
 int LinkedList::getSize() const { return size; }
+
+Car *LinkedList::getFront() const
+{
+    return head ? head->car : nullptr;
+}
 
 int LinkedList::findPosition(const std::string &carId) const
 {
-    //  O(n)
     Node *current = head;
     int pos = 1;
     while (current)
@@ -69,15 +83,19 @@ int LinkedList::findPosition(const std::string &carId) const
     return -1;
 }
 
+// ایمن شده در برابر car == nullptr
 Node *LinkedList::merge(Node *left, Node *right)
 {
-
     if (!left)
         return right;
     if (!right)
         return left;
 
-    if (left->car->getId().compare(right->car->getId()) <= 0)
+    // ایمنی: اگر car حذف شده یا nullptr بود
+    std::string leftId = left->car ? left->car->getId() : "";
+    std::string rightId = right->car ? right->car->getId() : "";
+
+    if (left->car == nullptr || (right->car != nullptr && leftId.compare(rightId) <= 0))
     {
         left->next = merge(left->next, right);
         return left;
@@ -91,15 +109,16 @@ Node *LinkedList::merge(Node *left, Node *right)
 
 void LinkedList::split(Node *source, Node *&left, Node *&right)
 {
-    //  O(n)
     if (!source || !source->next)
     {
         left = source;
         right = nullptr;
         return;
     }
+
     Node *slow = source;
     Node *fast = source->next;
+
     while (fast)
     {
         fast = fast->next;
@@ -109,6 +128,7 @@ void LinkedList::split(Node *source, Node *&left, Node *&right)
             fast = fast->next;
         }
     }
+
     left = source;
     right = slow->next;
     slow->next = nullptr;
@@ -118,46 +138,48 @@ void LinkedList::mergeSortHelper(Node *&headRef)
 {
     if (!headRef || !headRef->next)
         return;
+
     Node *left = nullptr;
     Node *right = nullptr;
     split(headRef, left, right);
+
     mergeSortHelper(left);
     mergeSortHelper(right);
+
     headRef = merge(left, right);
 }
 
 void LinkedList::mergeSort()
 {
-    //  O(n log n)
     mergeSortHelper(head);
 
+    // بازسازی tail
     tail = head;
     if (tail)
     {
         while (tail->next)
             tail = tail->next;
     }
-}
-
-Car *LinkedList::getFront() const
-{
-    // O(1)
-    return isEmpty() ? nullptr : head->car;
+    // اگر لیست خالی شد، tail باید nullptr باشه → الان هست
 }
 
 void LinkedList::printList() const
 {
-    //  O(n)
     if (isEmpty())
     {
         std::cout << "[Empty]" << std::endl;
         return;
     }
+
     Node *current = head;
     std::cout << "Top -> ";
     while (current)
     {
-        std::cout << current->car->getId();
+        if (current->car)
+            std::cout << current->car->getId();
+        else
+            std::cout << "[NULL]";
+
         if (current->next)
             std::cout << " -> ";
         current = current->next;
@@ -165,15 +187,15 @@ void LinkedList::printList() const
     std::cout << " -> Bottom" << std::endl;
 }
 
-void LinkedList::clear(bool deleteCars)
+void LinkedList::clear()
 {
-    // O(n)
     Node *cur = head;
     while (cur)
     {
         Node *next = cur->next;
-        if (deleteCars)
-            delete cur->car;
+        // car رو حذف نمی‌کنیم چون مالکیت منتقل شده
+        // فقط اگه هنوز اشاره‌گر داره و نمی‌خوایم، می‌تونیم nullptr کنیم
+        cur->car = nullptr;
         delete cur;
         cur = next;
     }

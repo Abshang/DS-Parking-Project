@@ -1,9 +1,8 @@
-// File: ParkingManager.h
-// Description: Implements operations: add, remove, find, sort, move cars.
-
+// File: parking/ParkingManager.h
 #pragma once
-#include "ParkingLot.h"
-#include "QueueLL.h"
+#include "../parking/ParkingLot.h"
+#include "../structures/QueueLL.h"
+#include <string>
 
 class ParkingManager
 {
@@ -13,6 +12,18 @@ private:
 
 public:
     ParkingManager(ParkingLot *pLot, QueueLL *pQueue);
-    ~ParkingManager();
-    // Functions like addCar, removeCar, findCar, sortStack, moveStack will be added later
+    ~ParkingManager() = default;
+
+    bool addCar();
+    bool addCarToStack(int stackId);
+
+    bool removeCarFromStack(int stackId, const std::string &carId);
+
+    bool findCar(const std::string &carId, int &stackNum, int &position);
+
+    void sortStack(int stackId);
+
+    void moveStack(int fromStackId, int toStackId);
+
+    void printStatus() const;
 };

@@ -1,36 +1,33 @@
-// StackLL.cpp
-// Implements parking lane with capacity m
-#include "StackLL.h"
+// structures/StackLL.cpp
+#include "structures/StackLL.h"
 #include <iostream>
 
 StackLL::StackLL(int m, int id)
-    : capacity(m), laneId(id)
+    : capacity(m > 0 ? m : 1), laneId(id)
 {
     if (m <= 0)
-    {
-        std::cerr << "Error: Stack capacity must be > 0\n";
-    }
+        std::cerr << "Warning: Stack capacity must be > 0. Using capacity = 1.\n";
 }
 
 bool StackLL::push(Car *car)
 {
+    if (!car)
+        return false;
     if (isFull())
     {
         std::cout << "Lane " << laneId << " is FULL (" << capacity << " cars)\n";
         return false;
     }
-    list.pushBack(car);
+    list.pushFront(car); // مالکیت به Stack منتقل شد
     return true;
 }
 
 Car *StackLL::pop()
 {
-    if (isEmpty())
-    {
+    Car *car = list.popFront();
+    if (!car)
         std::cout << "Lane " << laneId << " is EMPTY\n";
-        return nullptr;
-    }
-    return list.popFront();
+    return car; // مالکیت منتقل شد به caller
 }
 
 Car *StackLL::peek() const
@@ -44,7 +41,7 @@ int StackLL::getSize() const { return list.getSize(); }
 
 int StackLL::findCar(const std::string &carId) const
 {
-    return list.findPosition(carId);
+    return list.findPosition(carId); // از 1 شروع میشه (top = 1)
 }
 
 void StackLL::sortStack()
@@ -59,5 +56,26 @@ void StackLL::print(const std::string &title) const
     if (!title.empty())
         std::cout << " | " << title;
     std::cout << " ===\n";
-    list.printList();
+
+    if (isEmpty())
+    {
+        std::cout << "[Empty]\n";
+    }
+    else
+    {
+        list.printList();
+    }
+}
+
+void StackLL::clear()
+{
+    // حذف همه Carها (چون متعلق به این Stack هستن)
+    Node *current = list.getHead();
+    while (current)
+    {
+        delete current->car; // Car واقعی حذف میشه
+        current->car = nullptr;
+        current = current->next;
+    }
+    list.clear(); // فقط Nodeها رو پاک می‌کنه
 }
