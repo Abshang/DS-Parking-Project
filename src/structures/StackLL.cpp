@@ -1,7 +1,8 @@
 // structures/StackLL.cpp
-#include "structures/StackLL.h"
+#include "StackLL.h"
 #include <iostream>
 
+// O(1)
 StackLL::StackLL(int m, int id)
     : capacity(m > 0 ? m : 1), laneId(id)
 {
@@ -9,39 +10,46 @@ StackLL::StackLL(int m, int id)
         std::cerr << "Warning: Stack capacity must be > 0. Using capacity = 1.\n";
 }
 
+// O(1)
 bool StackLL::push(Car *car)
 {
     if (!car)
         return false;
+
     if (isFull())
     {
         std::cout << "Lane " << laneId << " is FULL (" << capacity << " cars)\n";
         return false;
     }
-    list.pushFront(car); 
+
+    list.pushFront(car);
     return true;
 }
 
+// O(1)
 Car *StackLL::pop()
 {
     Car *car = list.popFront();
     if (!car)
         std::cout << "Lane " << laneId << " is EMPTY\n";
-    return car; 
+    return car;
 }
 
+// O(1)
 Car *StackLL::peek() const
 {
     return list.getFront();
 }
 
 bool StackLL::isEmpty() const { return list.isEmpty(); }
+
 bool StackLL::isFull() const { return list.getSize() == capacity; }
+
 int StackLL::getSize() const { return list.getSize(); }
 
 int StackLL::findCar(const std::string &carId) const
 {
-    return list.findPosition(carId); // از 1 شروع میشه (top = 1)
+    return list.findPosition(carId);
 }
 
 void StackLL::sortStack()
@@ -58,23 +66,20 @@ void StackLL::print(const std::string &title) const
     std::cout << " ===\n";
 
     if (isEmpty())
-    {
         std::cout << "[Empty]\n";
-    }
     else
-    {
         list.printList();
-    }
 }
 
+// O(m)
 void StackLL::clear()
 {
     Node *current = list.getHead();
     while (current)
     {
-        delete current->car; 
-        current->car = nullptr;
+        delete current->car;
         current = current->next;
     }
-    list.clear(); 
+
+    list.clear();
 }

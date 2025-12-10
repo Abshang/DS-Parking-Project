@@ -1,6 +1,6 @@
 // structures/QueueLL.h
 #pragma once
-#include "structures/LinkedList.h"
+#include "LinkedList.h"
 #include <string>
 
 class QueueLL
@@ -10,9 +10,10 @@ private:
 
 public:
     QueueLL() = default; // O(1)
-
-    ~QueueLL() { clear(); } // O(n)
-
+public:
+    LinkedList &getList() { return list; }
+    ~QueueLL() { clear(); }                          // O(n)
+    Node *getHead() const { return list.getHead(); } // O(1)
     QueueLL(const QueueLL &) = delete;
     QueueLL &operator=(const QueueLL &) = delete;
 

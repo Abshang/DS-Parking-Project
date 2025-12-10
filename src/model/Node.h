@@ -1,4 +1,3 @@
-// src/model/Node.h
 #pragma once
 #include "Car.h"
 
@@ -8,10 +7,9 @@ public:
     Car *car;
     Node *next;
 
-    explicit Node(Car *c = nullptr, Node *n = nullptr)
-        : car(c), next(n) {}
+    explicit Node(Car *c = nullptr, Node *n = nullptr); // O(1)
 
-    ~Node() = default;
+    ~Node() = default; // O(1)
 
     Node(const Node &) = delete;
     Node &operator=(const Node &) = delete;

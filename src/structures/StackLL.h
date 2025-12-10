@@ -1,6 +1,6 @@
 // structures/StackLL.h
 #pragma once
-#include "structures/LinkedList.h"
+#include "LinkedList.h"
 #include <string>
 
 class StackLL
@@ -12,7 +12,7 @@ private:
 
 public:
     StackLL(int m, int id = 0); // O(1)
-
+    LinkedList &getList() { return list; }
     ~StackLL() { clear(); } // O(m)
 
     StackLL(const StackLL &) = delete;
@@ -31,7 +31,7 @@ public:
 
     void print(const std::string &title = "") const; // O(m)
     int getId() const { return laneId; }             // O(1)
-
+    int getCapacity() const { return capacity; }
     Node *getHead() const { return list.getHead(); } // O(1)
     Node *getTail() const { return list.getTail(); } // O(1)
 

@@ -1,4 +1,4 @@
-// File: parking/ParkingManager.cpp
+// parking/ParkingManager.cpp
 #include "ParkingManager.h"
 #include <iostream>
 
@@ -8,16 +8,21 @@ ParkingManager::ParkingManager(ParkingLot *pLot, QueueLL *pQueue)
 {
 }
 
-// O(n) - Attempts to park a car in the first available lane. n = number of stacks.
+// O(n) - attempts to park a car in the first available lane. n = number of stacks.
 bool ParkingManager::addCar()
 {
-    if (entryQueue->isEmpty())
+    if (!entryQueue || entryQueue->isEmpty())
     {
         std::cout << "Entry Queue is EMPTY\n";
         return false;
     }
 
     Car *car = entryQueue->dequeue();
+    if (!car)
+    {
+        std::cout << "Dequeue returned nullptr\n";
+        return false;
+    }
 
     if (!lot->parkCarInFirstAvailable(car))
     {
@@ -30,16 +35,21 @@ bool ParkingManager::addCar()
     return true;
 }
 
-// O(1) - Attempts to park a car in a specific lane.
+// O(1) - attempts to park a car in a specific lane.
 bool ParkingManager::addCarToStack(int stackId)
 {
-    if (entryQueue->isEmpty())
+    if (!entryQueue || entryQueue->isEmpty())
     {
         std::cout << "Entry Queue is EMPTY\n";
         return false;
     }
 
     Car *car = entryQueue->dequeue();
+    if (!car)
+    {
+        std::cout << "Dequeue returned nullptr\n";
+        return false;
+    }
 
     if (!lot->parkCarInSpecificStack(car, stackId))
     {
@@ -52,7 +62,7 @@ bool ParkingManager::addCarToStack(int stackId)
     return true;
 }
 
-// O(1) - Removes a car only if it is at the front of the specified stack.
+// O(1) - removes a car only if it is at the front of the specified stack.
 bool ParkingManager::removeCarFromStack(int stackId, const std::string &carId)
 {
     if (!lot->removeCarFromStack(stackId, carId))
@@ -64,7 +74,7 @@ bool ParkingManager::removeCarFromStack(int stackId, const std::string &carId)
     return true;
 }
 
-// O(n * m) - Finds a car in the entire parking lot. n=numStacks, m=stackCapacity.
+// O(n * m) - finds a car in the entire parking lot. n=numStacks, m=stackCapacity.
 bool ParkingManager::findCar(const std::string &carId, int &stackNum, int &position)
 {
     if (!lot->findCar(carId, stackNum, position))
@@ -77,7 +87,7 @@ bool ParkingManager::findCar(const std::string &carId, int &stackNum, int &posit
     return true;
 }
 
-// O(m log m) - Sorts the contents of a specific stack. m=stackCapacity.
+// O(m log m) - sorts the contents of a specific stack. m=stackCapacity.
 void ParkingManager::sortStack(int stackId)
 {
     if (stackId < 1 || stackId > lot->getNumStacks())
@@ -89,10 +99,16 @@ void ParkingManager::sortStack(int stackId)
     std::cout << "Lane " << stackId << " sorted successfully using Merge Sort.\n";
 }
 
-// O(n * m) - Moves all cars from stack 'i' to stack 'j' and subsequent stacks, exiting any leftovers.
-// n = number of stacks, m = stack capacity.
+// O(n * m) - moves all cars from stack 'fromStackId' to stack 'toStackId' and subsequent stacks.
+// If not enough space, remaining cars are removed (deleted) so that the source stack becomes empty.
 void ParkingManager::moveStack(int fromStackId, int toStackId)
 {
+    // Validate indices
+    if (!lot)
+    {
+        std::cout << "ParkingLot pointer is null\n";
+        return;
+    }
 
     if (fromStackId < 1 || fromStackId > lot->getNumStacks() ||
         toStackId < 1 || toStackId > lot->getNumStacks())
@@ -107,6 +123,11 @@ void ParkingManager::moveStack(int fromStackId, int toStackId)
     }
 
     StackLL *source = lot->getStack(fromStackId - 1);
+    if (!source)
+    {
+        std::cout << "Source stack is null\n";
+        return;
+    }
     if (source->isEmpty())
     {
         std::cout << "Stack " << fromStackId << " is already empty.\n";
@@ -116,49 +137,55 @@ void ParkingManager::moveStack(int fromStackId, int toStackId)
     LinkedList carsToMove;
     while (!source->isEmpty())
     {
-        carsToMove.pushBack(source->pop());
+        Car *c = source->pop();
+        if (c)
+            carsToMove.pushFront(c);
     }
     std::cout << "All cars temporarily moved from lane " << fromStackId << ".\n";
 
-    int targetId = toStackId;
-    Node *current = carsToMove.getHead();
-    while (current != nullptr && targetId <= lot->getNumStacks())
+    int currentIndex = toStackId - 1;
+    Node *node = carsToMove.getHead();
+
+    while (node && currentIndex < lot->getNumStacks())
     {
-        StackLL *target = lot->getStack(targetId - 1);
-
-        while (!target->isFull() && current != nullptr)
+        StackLL *target = lot->getStack(currentIndex);
+        // fill target as much as possible
+        while (node && !target->isFull())
         {
-            Car *car = current->car;
-            current->car = nullptr;
+            Car *car = node->car;
+            // try to push into target
+            bool pushed = target->push(car);
+            if (!pushed)
+            {
+                break;
+            }
+            node->car = nullptr;
 
-            target->push(car);
+            std::cout << "Car " << car->getId() << " moved from lane "
+                      << fromStackId << " -> lane " << (currentIndex + 1) << "\n";
 
-            std::cout << "Car " << car->getId()
-                      << " moved from lane " << fromStackId
-                      << " -> lane " << targetId << "\n";
-
-            current = current->next;
+            node = node->next;
         }
-        targetId++;
+        currentIndex++;
     }
 
-    if (current != nullptr)
+    Node *rem = node;
+    while (rem)
     {
-        std::cout << "Warning: Not enough space in subsequent lanes. "
-                  << "Remaining cars must **EXIT** the parking lot to ensure lane "
-                  << fromStackId << " is completely empty.\n";
-
-        Node *toDelete = current;
-        while (toDelete != nullptr)
+        if (rem->car)
         {
-            delete toDelete->car;
-            toDelete->car = nullptr;
-            toDelete = toDelete->next;
+            std::cout << "Car " << rem->car->getId() << " cannot be moved (no space). Exiting and freeing memory.\n";
+            delete rem->car;
+            rem->car = nullptr;
         }
+        rem = rem->next;
     }
+
+    carsToMove.clear();
 
     std::cout << "Movement completed. Lane " << fromStackId << " is now empty.\n";
 }
+
 // O(n * m) - Prints the status of the entire system (Queue + ParkingLot).
 void ParkingManager::printStatus() const
 {
@@ -166,8 +193,10 @@ void ParkingManager::printStatus() const
     std::cout << "========================================================\n";
     std::cout << "                  PARKING SYSTEM STATUS                 \n";
     std::cout << "========================================================\n";
-    entryQueue->print("Incoming Cars");
+    if (entryQueue)
+        entryQueue->print("Incoming Cars");
     std::cout << "\n";
-    lot->printParkingLot();
+    if (lot)
+        lot->printParkingLot();
     std::cout << "========================================================\n\n";
 }

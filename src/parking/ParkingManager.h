@@ -1,29 +1,28 @@
-// File: parking/ParkingManager.h
+// parking/ParkingManager.h
 #pragma once
-#include "../parking/ParkingLot.h"
-#include "../structures/QueueLL.h"
-#include <string>
+#include "ParkingLot.h"
+#include "structures/QueueLL.h"
+#include <unordered_set>
 
 class ParkingManager
 {
 private:
     ParkingLot *lot;
     QueueLL *entryQueue;
+    std::unordered_set<std::string> licensePlates;
 
 public:
-    ParkingManager(ParkingLot *pLot, QueueLL *pQueue);
-    ~ParkingManager() = default;
+    ParkingManager(ParkingLot *pLot, QueueLL *pQueue); // O(1)
+    ~ParkingManager() = default;                       // O(1)
+    bool addCar();                                     // O(n)
 
-    bool addCar();
-    bool addCarToStack(int stackId);
+    bool addCarToQueue(Car *car);                                         // O(1)
+    bool addCarToStack(int stackId);                                      // O(1)
+    bool removeCarFromStack(int stackId, const std::string &carId);       // O(1)
+    bool findCar(const std::string &carId, int &stackNum, int &position); // O(n * m)
 
-    bool removeCarFromStack(int stackId, const std::string &carId);
+    void sortStack(int stackId); // O(m log m)
 
-    bool findCar(const std::string &carId, int &stackNum, int &position);
-
-    void sortStack(int stackId);
-
-    void moveStack(int fromStackId, int toStackId);
-
-    void printStatus() const;
+    void moveStack(int fromStackId, int toStackId); // O(n * m)
+    void printStatus() const;                       // O(n * m)
 };

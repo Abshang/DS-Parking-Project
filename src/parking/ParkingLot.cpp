@@ -1,7 +1,8 @@
-// ParkingLot.cpp
-#include "parking/ParkingLot.h"
+// parking/ParkingLot.cpp
+#include "ParkingLot.h"
 #include <iostream>
 
+// Constructor
 ParkingLot::ParkingLot(int n, int capacity)
     : numStacks(n > 0 ? n : 1), stackCapacity(capacity > 0 ? capacity : 1)
 {
@@ -12,13 +13,28 @@ ParkingLot::ParkingLot(int n, int capacity)
     }
 }
 
+// Destructor
 ParkingLot::~ParkingLot()
 {
     for (int i = 0; i < numStacks; ++i)
-        delete stacks[i]; 
+    {
+        delete stacks[i];
+    }
     delete[] stacks;
 }
 
+// Get total number of cars in the parking lot
+int ParkingLot::getTotalCars() const
+{
+    int total = 0;
+    for (int i = 0; i < numStacks; ++i)
+    {
+        total += stacks[i]->getSize();
+    }
+    return total;
+}
+
+// Park car in the first available stack
 bool ParkingLot::parkCarInFirstAvailable(Car *car)
 {
     if (!car)
@@ -28,101 +44,99 @@ bool ParkingLot::parkCarInFirstAvailable(Car *car)
     {
         if (!stacks[i]->isFull())
         {
-            stacks[i]->push(car); 
-            std::cout << "Car " << car->getId() << " parked in lane " << stacks[i]->getId() << "\n";
+            stacks[i]->push(car);
+            std::cout << "Car " << car->getId() << " parked in lane " << stacks[i]->getId() << std::endl;
             return true;
         }
     }
-    std::cout << "Parking Lot is FULL! Cannot park car " << car->getId() << "\n";
+    std::cout << "Parking lot is full!" << std::endl;
     return false;
 }
 
+// Park car in a specific stack by stackId
 bool ParkingLot::parkCarInSpecificStack(Car *car, int stackId)
 {
-    if (!car)
+    if (!car || stackId < 1 || stackId > numStacks)
         return false;
-    if (stackId < 1 || stackId > numStacks)
-    {
-        std::cout << "Invalid Stack ID " << stackId << "\n";
-        return false;
-    }
 
     StackLL *stack = stacks[stackId - 1];
     if (stack->isFull())
     {
-        std::cout << "Lane " << stackId << " is FULL! Cannot park car " << car->getId() << "\n";
+        std::cout << "Lane " << stackId << " is full." << std::endl;
         return false;
     }
 
-    stack->push(car); 
-    std::cout << "Car " << car->getId() << " parked in lane " << stackId << "\n";
+    stack->push(car);
+    std::cout << "Car " << car->getId() << " parked in lane " << stackId << std::endl;
     return true;
 }
 
+// Remove a car from a specific stack
 bool ParkingLot::removeCarFromStack(int stackId, const std::string &carId)
 {
     if (stackId < 1 || stackId > numStacks)
     {
-        std::cout << "Invalid Stack ID " << stackId << "\n";
+        std::cout << "ERROR: Invalid stack ID" << std::endl;
         return false;
     }
 
     StackLL *stack = stacks[stackId - 1];
-    Car *frontCar = stack->peek();
+    int position = stack->findCar(carId);
 
-    if (!frontCar)
+    if (position == -1)
     {
-        std::cout << "Lane " << stackId << " is EMPTY\n";
+        std::cout << "Car " << carId << " not found in lane " << stackId << std::endl;
         return false;
     }
 
-    if (frontCar->getId() != carId)
+    if (position != 1)
     {
-        std::cout << "Cannot remove car " << carId << " from lane " << stackId
-                  << " (not at the front)\n";
+        std::cout << "Car " << carId << " is not at the top of stack. Cannot remove." << std::endl;
         return false;
     }
 
-    Car *removedCar = stack->pop(); 
-    delete removedCar;              
-    std::cout << "Car " << carId << " removed from lane " << stackId << " and memory freed.\n";
+    Car *removedCar = stack->pop();
+    delete removedCar;
+    std::cout << "Car " << carId << " removed from lane " << stackId << std::endl;
     return true;
 }
 
+// Find a car in the entire parking lot
 bool ParkingLot::findCar(const std::string &carId, int &stackNum, int &position)
 {
     for (int i = 0; i < numStacks; ++i)
     {
-        int pos = stacks[i]->findCar(carId);
-        if (pos != -1)
+        position = stacks[i]->findCar(carId);
+        if (position != -1)
         {
             stackNum = stacks[i]->getId();
-            position = pos;
             return true;
         }
     }
-    stackNum = -1;
-    position = -1;
+    std::cout << "Car " << carId << " not found in parking lot." << std::endl;
     return false;
 }
 
+// Sort a specific stack using merge sort
 void ParkingLot::sortStack(int stackId)
 {
     if (stackId < 1 || stackId > numStacks)
     {
-        std::cout << "Invalid Stack ID " << stackId << "\n";
+        std::cout << "ERROR: Invalid stack ID" << std::endl;
         return;
     }
+
     stacks[stackId - 1]->sortStack();
-    std::cout << "Lane " << stackId << " sorted successfully.\n";
+    std::cout << "Stack " << stackId << " sorted." << std::endl;
 }
 
+// Print the status of the parking lot
 void ParkingLot::printParkingLot() const
 {
-    std::cout << "\n================= PARKING LOT STATUS =================\n";
+    std::cout << "\n=================== PARKING LOT STATUS ===================" << std::endl;
     for (int i = 0; i < numStacks; ++i)
     {
         stacks[i]->print();
     }
-    std::cout << "======================================================\n";
+    std::cout << "===========================================================" << std::endl;
 }

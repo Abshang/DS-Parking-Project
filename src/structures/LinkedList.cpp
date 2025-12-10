@@ -5,13 +5,13 @@
 // O(1)
 LinkedList::LinkedList() : head(nullptr), tail(nullptr), size(0) {}
 
-// O(n) - Destructor: Calls clear() to delete all nodes. n = list size.
+// O(n)
 LinkedList::~LinkedList()
 {
     clear();
 }
 
-// O(1) - Adds a node to the end of the list (Used for Queue enqueue).
+// O(1)
 void LinkedList::pushBack(Car *car)
 {
     if (!car)
@@ -32,7 +32,7 @@ void LinkedList::pushBack(Car *car)
     ++size;
 }
 
-// O(1) - Adds a node to the front of the list (Used for Stack push and Queue enqueueFront).
+// O(1)
 void LinkedList::pushFront(Car *car)
 {
     if (!car)
@@ -41,12 +41,14 @@ void LinkedList::pushFront(Car *car)
     Node *newNode = new Node(car);
     newNode->next = head;
     head = newNode;
+
     if (!tail)
         tail = newNode;
+
     ++size;
 }
 
-// O(1) - Removes and returns the car from the front (Used for Stack pop and Queue dequeue).
+// O(1)
 Car *LinkedList::popFront()
 {
     if (isEmpty())
@@ -54,7 +56,6 @@ Car *LinkedList::popFront()
 
     Node *tmp = head;
     Car *car = tmp->car;
-    tmp->car = nullptr;
 
     head = head->next;
     if (!head)
@@ -65,34 +66,36 @@ Car *LinkedList::popFront()
     return car;
 }
 
-// O(1) - Checks if the list is empty.
+// O(1)
 bool LinkedList::isEmpty() const { return head == nullptr; }
 
-// O(1) - Returns the current size.
+// O(1)
 int LinkedList::getSize() const { return size; }
 
-// O(1) - Returns the car at the front without removal.
+// O(1)
 Car *LinkedList::getFront() const
 {
     return head ? head->car : nullptr;
 }
 
-// O(n) - Searches for a car by ID. n = list size.
+// O(n)
 int LinkedList::findPosition(const std::string &carId) const
 {
     Node *current = head;
     int pos = 1;
+
     while (current)
     {
         if (current->car && current->car->getId() == carId)
             return pos;
+
         current = current->next;
         ++pos;
     }
     return -1;
 }
 
-// O(n) - Merges two sorted lists. n = total nodes in left + right.
+// O(n)
 Node *LinkedList::merge(Node *left, Node *right)
 {
     if (!left)
@@ -100,10 +103,13 @@ Node *LinkedList::merge(Node *left, Node *right)
     if (!right)
         return left;
 
-    std::string leftId = left->car ? left->car->getId() : "";
-    std::string rightId = right->car ? right->car->getId() : "";
+    if (!left->car)
+        return merge(left->next, right);
 
-    if (left->car == nullptr || (right->car != nullptr && leftId.compare(rightId) <= 0))
+    if (!right->car)
+        return merge(left, right->next);
+
+    if (left->car->getId() <= right->car->getId())
     {
         left->next = merge(left->next, right);
         return left;
@@ -115,7 +121,7 @@ Node *LinkedList::merge(Node *left, Node *right)
     }
 }
 
-// O(n) - Splits the list into two halves using the fast/slow pointer technique. n = source size.
+// O(n)
 void LinkedList::split(Node *source, Node *&left, Node *&right)
 {
     if (!source || !source->next)
@@ -143,7 +149,7 @@ void LinkedList::split(Node *source, Node *&left, Node *&right)
     slow->next = nullptr;
 }
 
-// O(n log n) - Recursive core of Merge Sort. n = current list size.
+// O(n log n)
 void LinkedList::mergeSortHelper(Node *&headRef)
 {
     if (!headRef || !headRef->next)
@@ -151,6 +157,7 @@ void LinkedList::mergeSortHelper(Node *&headRef)
 
     Node *left = nullptr;
     Node *right = nullptr;
+
     split(headRef, left, right);
 
     mergeSortHelper(left);
@@ -159,25 +166,21 @@ void LinkedList::mergeSortHelper(Node *&headRef)
     headRef = merge(left, right);
 }
 
-// O(n log n) - Public method to start the Merge Sort.
+// O(n log n)
 void LinkedList::mergeSort()
 {
     mergeSortHelper(head);
 
     tail = head;
-    if (tail)
-    {
-        while (tail->next)
-            tail = tail->next;
-    }
+    while (tail && tail->next)
+        tail = tail->next;
 }
 
-// O(n) - Displays list contents (for debugging/status). n = list size.
 void LinkedList::printList() const
 {
     if (isEmpty())
     {
-        std::cout << "[Empty]" << std::endl;
+        std::cout << "[Empty]\n";
         return;
     }
 
@@ -192,19 +195,19 @@ void LinkedList::printList() const
 
         if (current->next)
             std::cout << " -> ";
+
         current = current->next;
     }
-    std::cout << " -> Bottom" << std::endl;
+    std::cout << " -> Bottom\n";
 }
 
-// O(n) - Deletes all nodes and their associated Car objects (Crucial for memory management). n = list size.
+// O(n)
 void LinkedList::clear()
 {
     Node *cur = head;
     while (cur)
     {
         Node *next = cur->next;
-        cur->car = nullptr;
         delete cur;
         cur = next;
     }

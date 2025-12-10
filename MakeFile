@@ -1,0 +1,67 @@
+# Makefile for Parking Lot Manager
+
+# Compiler settings
+CXX = g++
+CXXFLAGS = -std=c++11 -Wall -Wextra -Isrc
+TARGET = parking_manager
+
+MODEL_DIR = src/model
+STRUCT_DIR = src/structures
+PARKING_DIR = src/parking
+GUI_DIR = src/gui
+
+# Source files
+MODEL_SRC = $(MODEL_DIR)/Car.cpp $(MODEL_DIR)/Node.cpp
+STRUCT_SRC = $(STRUCT_DIR)/LinkedList.cpp $(STRUCT_DIR)/StackLL.cpp $(STRUCT_DIR)/QueueLL.cpp
+PARKING_SRC = $(PARKING_DIR)/ParkingLot.cpp $(PARKING_DIR)/ParkingManager.cpp
+GUI_SRC = $(GUI_DIR)/RaylibUtils.cpp $(GUI_DIR)/InputHandler.cpp
+MAIN_SRC = main.cpp
+
+SOURCES = $(MAIN_SRC) $(MODEL_SRC) $(STRUCT_SRC) $(PARKING_SRC) $(GUI_SRC)
+
+# Object files
+OBJECTS = $(SOURCES:.cpp=.o)
+
+# Platform detection
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S),Linux)
+    LIBS = -lraylib -lm -lpthread -ldl -lrt -lX11
+endif
+
+ifeq ($(UNAME_S),Darwin)
+    LIBS = -lraylib -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL
+endif
+
+ifeq ($(OS),Windows_NT)
+    TARGET = parking_manager.exe
+    LIBS = -lraylib -lopengl32 -lgdi32 -lwinmm
+endif
+
+# Default target
+all: $(TARGET)
+
+# Link
+$(TARGET): $(OBJECTS)
+    @echo "Linking $(TARGET)..."
+    $(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJECTS) $(LIBS)
+    @echo "Build complete!"
+    @echo "Run with: ./$(TARGET)"
+
+# Compile
+%.o: %.cpp
+    @echo "Compiling $<..."
+    $(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Clean
+clean:
+    @echo "Cleaning build files..."
+    rm -f $(OBJECTS) $(TARGET)
+    @echo "Clean complete!"
+
+# Run
+run: $(TARGET)
+    ./$(TARGET)
+
+
+.PHONY: all clean run install uninstall help
