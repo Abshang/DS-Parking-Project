@@ -20,6 +20,7 @@ void LinkedList::pushBack(Car *car)
     Node *newNode = new Node(car);
     newNode->next = nullptr;
 
+    // the list is empty befor pushback 
     if (!head)
     {
         head = tail = newNode;

@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .control-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            height: fit-content;
+        }
+
+        .control-section {
+            margin-bottom: 25px;
+        }
+
+        .control-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+            transform: translateY(-2px);
+        }
+
+        .parking-view {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .parking-view h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .queue-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+        }
+
+        .queue-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .queue-cars {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            min-height: 60px;
+            align-items: center;
+        }
+
+        .car-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .stacks-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stack {
+            background: #f7fafc;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            padding: 15px;
+            min-height: 200px;
+        }
+
+        .stack-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .stack-cars {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stack-car {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            text-align: center;
+            font-weight: 600;
+            color: #2d3748;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .stack-car:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .stack-car.top {
+            border-color: #48bb78;
+            background: #f0fff4;
+        }
+
+        .empty-stack {
+            text-align: center;
+            color: #a0aec0;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        .log-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            position: sticky;
+            top: 0;
+            background: white;
+            padding-bottom: 10px;
+        }
+
+        .log-entry {
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+            background: #f7fafc;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .log-entry.success {
+            border-left-color: #48bb78;
+            background: #f0fff4;
+        }
+
+        .log-entry.error {
+            border-left-color: #f56565;
+            background: #fff5f5;
+        }
+
+        .log-entry.info {
+            border-left-color: #4299e1;
+            background: #ebf8ff;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 Parking Management System</h1>
+            <div class="stats">
+                <div class="stat-box">
+                    <strong>Total Lanes:</strong> <span id="totalLanes">0</span>
+                </div>
+                <div class="stat-box">
+                    <strong>Cars Parked:</strong> <span id="totalCars">0</span>
+                </div>
+                <div class="stat-box">
+                    <strong>Queue Size:</strong> <span id="queueSize">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="control-panel">
+                <div class="control-section">
+                    <h3>🎛️ Initialize System</h3>
+                    <div class="input-group">
+                        <label>Number of Lanes:</label>
+                        <input type="number" id="numLanes" value="4" min="1" max="10">
+                    </div>
+                    <div class="input-group">
+                        <label>Lane Capacity:</label>
+                        <input type="number" id="laneCapacity" value="5" min="1" max="20">
+                    </div>
+                    <button class="btn btn-primary" onclick="initializeSystem()">Initialize System</button>
+                </div>
+
+                <div class="control-section">
+                    <h3>➕ Add Car to Queue</h3>
+                    <div class="input-group">
+                        <label>Car ID:</label>
+                        <input type="text" id="carId" placeholder="e.g., CAR001">
+                    </div>
+                    <button class="btn btn-secondary" onclick="addCarToQueue()">Add to Queue</button>
+                </div>
+
+                <div class="control-section">
+                    <h3>🅿️ Park Car</h3>
+                    <button class="btn btn-primary" onclick="parkCarFirst()">Park in First Available Lane</button>
+                    <div class="input-group" style="margin-top: 15px;">
+                        <label>Or Specific Lane:</label>
+                        <input type="number" id="specificLane" placeholder="Lane number" min="1">
+                    </div>
+                    <button class="btn btn-primary" onclick="parkCarSpecific()">Park in Specific Lane</button>
+                </div>
+
+                <div class="control-section">
+                    <h3>🔍 Find & Remove Car</h3>
+                    <div class="input-group">
+                        <label>Car ID:</label>
+                        <input type="text" id="findCarId" placeholder="e.g., CAR001">
+                    </div>
+                    <button class="btn btn-secondary" onclick="findCar()">Find Car</button>
+                    <div class="input-group" style="margin-top: 15px;">
+                        <label>Lane Number:</label>
+                        <input type="number" id="removeLane" placeholder="Lane number" min="1">
+                    </div>
+                    <button class="btn btn-danger" onclick="removeCar()">Remove from Top</button>
+                </div>
+
+                <div class="control-section">
+                    <h3>🔄 Stack Operations</h3>
+                    <div class="input-group">
+                        <label>Lane to Sort:</label>
+                        <input type="number" id="sortLane" placeholder="Lane number" min="1">
+                    </div>
+                    <button class="btn btn-primary" onclick="sortStack()">Sort Lane</button>
+
+                    <div style="margin-top: 15px;">
+                        <div class="input-group">
+                            <label>From Lane:</label>
+                            <input type="number" id="fromLane" placeholder="Source lane" min="1">
+                        </div>
+                        <div class="input-group">
+                            <label>To Lane:</label>
+                            <input type="number" id="toLane" placeholder="Target lane" min="1">
+                        </div>
+                        <button class="btn btn-primary" onclick="moveStack()">Move Stack</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="parking-view">
+                <h2>🏢 Parking Lot View</h2>
+
+                <div class="queue-section">
+                    <h3>📋 Entry Queue (Front → Back)</h3>
+                    <div class="queue-cars" id="queueView">
+                        <span style="color: #a0aec0; font-style: italic;">Queue is empty</span>
+                    </div>
+                </div>
+
+                <div class="stacks-container" id="stacksView">
+                    <div class="empty-stack">Initialize system to start</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="log-section">
+            <h3>📝 Activity Log</h3>
+            <div id="logView">
+                <div class="log-entry info">System ready. Initialize to begin.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data structures
+        class Car {
+            constructor(id) {
+                this.id = id;
+            }
+        }
+
+        class Node {
+            constructor(car, next = null) {
+                this.car = car;
+                this.next = next;
+            }
+        }
+
+        class LinkedList {
+            constructor() {
+                this.head = null;
+                this.tail = null;
+                this.size = 0;
+            }
+
+            pushBack(car) {
+                const newNode = new Node(car);
+                if (!this.head) {
+                    this.head = this.tail = newNode;
+                } else {
+                    this.tail.next = newNode;
+                    this.tail = newNode;
+                }
+                this.size++;
+            }
+
+            pushFront(car) {
+                const newNode = new Node(car);
+                newNode.next = this.head;
+                this.head = newNode;
+                if (!this.tail) this.tail = newNode;
+                this.size++;
+            }
+
+            popFront() {
+                if (!this.head) return null;
+                const car = this.head.car;
+                this.head = this.head.next;
+                if (!this.head) this.tail = null;
+                this.size--;
+                return car;
+            }
+
+            findPosition(carId) {
+                let current = this.head;
+                let pos = 1;
+                while (current) {
+                    if (current.car.id === carId) return pos;
+                    current = current.next;
+                    pos++;
+                }
+                return -1;
+            }
+
+            toArray() {
+                const arr = [];
+                let current = this.head;
+                while (current) {
+                    arr.push(current.car);
+                    current = current.next;
+                }
+                return arr;
+            }
+
+            mergeSort() {
+                this.head = this.mergeSortHelper(this.head);
+                this.tail = this.head;
+                while (this.tail && this.tail.next) {
+                    this.tail = this.tail.next;
+                }
+            }
+
+            mergeSortHelper(head) {
+                if (!head || !head.next) return head;
+
+                const middle = this.getMiddle(head);
+                const nextOfMiddle = middle.next;
+                middle.next = null;
+
+                const left = this.mergeSortHelper(head);
+                const right = this.mergeSortHelper(nextOfMiddle);
+
+                return this.merge(left, right);
+            }
+
+            getMiddle(head) {
+                if (!head) return head;
+                let slow = head;
+                let fast = head.next;
+                while (fast && fast.next) {
+                    slow = slow.next;
+                    fast = fast.next.next;
+                }
+                return slow;
+            }
+
+            merge(left, right) {
+                if (!left) return right;
+                if (!right) return left;
+
+                let result;
+                if (left.car.id <= right.car.id) {
+                    result = left;
+                    result.next = this.merge(left.next, right);
+                } else {
+                    result = right;
+                    result.next = this.merge(left, right.next);
+                }
+                return result;
+            }
+        }
+
+        class Queue {
+            constructor() {
+                this.list = new LinkedList();
+            }
+
+            enqueue(car) {
+                this.list.pushBack(car);
+            }
+
+            dequeue() {
+                return this.list.popFront();
+            }
+
+            isEmpty() {
+                return this.list.size === 0;
+            }
+
+            getSize() {
+                return this.list.size;
+            }
+
+            toArray() {
+                return this.list.toArray();
+            }
+        }
+
+        class Stack {
+            constructor(capacity, id) {
+                this.list = new LinkedList();
+                this.capacity = capacity;
+                this.id = id;
+            }
+
+            push(car) {
+                if (this.isFull()) return false;
+                this.list.pushFront(car);
+                return true;
+            }
+
+            pop() {
+                return this.list.popFront();
+            }
+
+            isFull() {
+                return this.list.size >= this.capacity;
+            }
+
+            isEmpty() {
+                return this.list.size === 0;
+            }
+
+            getSize() {
+                return this.list.size;
+            }
+
+            findCar(carId) {
+                return this.list.findPosition(carId);
+            }
+
+            toArray() {
+                return this.list.toArray();
+            }
+
+            sort() {
+                this.list.mergeSort();
+            }
+        }
+
+        class ParkingLot {
+            constructor(numStacks, capacity) {
+                this.stacks = [];
+                for (let i = 0; i < numStacks; i++) {
+                    this.stacks.push(new Stack(capacity, i + 1));
+                }
+            }
+
+            getTotalCars() {
+                return this.stacks.reduce((sum, stack) => sum + stack.getSize(), 0);
+            }
+        }
+
+        // Global state
+        let parkingLot = null;
+        let entryQueue = new Queue();
+
+        function log(message, type = 'info') {
+            const logView = document.getElementById('logView');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            const time = new Date().toLocaleTimeString();
+            entry.textContent = `[${time}] ${message}`;
+            logView.insertBefore(entry, logView.firstChild);
+        }
+
+        function updateStats() {
+            document.getElementById('totalLanes').textContent = parkingLot ? parkingLot.stacks.length : 0;
+            document.getElementById('totalCars').textContent = parkingLot ? parkingLot.getTotalCars() : 0;
+            document.getElementById('queueSize').textContent = entryQueue.getSize();
+        }
+
+        function updateView() {
+            // Update queue
+            const queueView = document.getElementById('queueView');
+            const queueCars = entryQueue.toArray();
+            if (queueCars.length === 0) {
+                queueView.innerHTML = '<span style="color: #a0aec0; font-style: italic;">Queue is empty</span>';
+            } else {
+                queueView.innerHTML = queueCars.map(car =>
+                    `<div class="car-card">${car.id}</div>`
+                ).join('');
+            }
+
+            // Update stacks
+            const stacksView = document.getElementById('stacksView');
+            if (!parkingLot) {
+                stacksView.innerHTML = '<div class="empty-stack">Initialize system to start</div>';
+            } else {
+                stacksView.innerHTML = parkingLot.stacks.map((stack, idx) => {
+                    const cars = stack.toArray();
+                    const carsHTML = cars.length === 0
+                        ? '<div class="empty-stack">Empty Lane</div>'
+                        : cars.map((car, carIdx) =>
+                            `<div class="stack-car ${carIdx === 0 ? 'top' : ''}">${car.id}${carIdx === 0 ? ' (Top)' : ''}</div>`
+                        ).join('');
+
+                    return `
+                        <div class="stack">
+                            <div class="stack-header">
+                                Lane ${stack.id}<br>
+                                ${stack.getSize()} / ${stack.capacity} cars
+                            </div>
+                            <div class="stack-cars">${carsHTML}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            updateStats();
+        }
+
+        function initializeSystem() {
+            const numLanes = parseInt(document.getElementById('numLanes').value);
+            const capacity = parseInt(document.getElementById('laneCapacity').value);
+
+            if (numLanes < 1 || capacity < 1) {
+                log('Invalid parameters. Lanes and capacity must be >= 1', 'error');
+                return;
+            }
+
+            parkingLot = new ParkingLot(numLanes, capacity);
+            entryQueue = new Queue();
+            log(`System initialized with ${numLanes} lanes, capacity ${capacity} each`, 'success');
+            updateView();
+        }
+
+        function addCarToQueue() {
+            const carId = document.getElementById('carId').value.trim();
+            if (!carId) {
+                log('Please enter a car ID', 'error');
+                return;
+            }
+
+            const car = new Car(carId);
+            entryQueue.enqueue(car);
+            log(`Car ${carId} added to entry queue`, 'success');
+            document.getElementById('carId').value = '';
+            updateView();
+        }
+
+        function parkCarFirst() {
+            if (!parkingLot) {
+                log('Please initialize the system first', 'error');
+                return;
+            }
+
+            if (entryQueue.isEmpty()) {
+                log('Entry queue is empty', 'error');
+                return;
+            }
+
+            const car = entryQueue.dequeue();
+            for (let stack of parkingLot.stacks) {
+                if (!stack.isFull()) {
+                    stack.push(car);
+                    log(`Car ${car.id} parked in lane ${stack.id}`, 'success');
+                    updateView();
+                    return;
+                }
+            }
+
+            entryQueue.list.pushFront(car);
+            log('Parking lot is full! Car returned to queue', 'error');
+            updateView();
+        }
+
+        function parkCarSpecific() {
+            if (!parkingLot) {
+                log('Please initialize the system first', 'error');
+                return;
+            }
+
+            const laneNum = parseInt(document.getElementById('specificLane').value);
+            if (isNaN(laneNum) || laneNum < 1 || laneNum > parkingLot.stacks.length) {
+                log('Invalid lane number', 'error');
+                return;
+            }
+
+            if (entryQueue.isEmpty()) {
+                log('Entry queue is empty', 'error');
+                return;
+            }
+
+            const car = entryQueue.dequeue();
+            const stack = parkingLot.stacks[laneNum - 1];
+
+            if (stack.isFull()) {
+                entryQueue.list.pushFront(car);
+                log(`Lane ${laneNum} is full. Car returned to queue`, 'error');
+                updateView();
+                return;
+            }
+
+            stack.push(car);
+            log(`Car ${car.id} parked in lane ${laneNum}`, 'success');
+            updateView();
+        }
+
+        function findCar() {
+            if (!parkingLot) {
+                log('Please initialize the system first', 'error');
+                return;
+            }
+
+            const carId = document.getElementById('findCarId').value.trim();
+            if (!carId) {
+                log('Please enter a car ID', 'error');
+                return;
+            }
+
+            for (let stack of parkingLot.stacks) {
+                const pos = stack.findCar(carId);
+                if (pos !== -1) {
+                    log(`Car ${carId} found in Lane ${stack.id} at position ${pos} (1 = top)`, 'success');
+                    return;
+                }
+            }
+
+            log(`Car ${carId} not found in parking lot`, 'error');
+        }
+
+        function removeCar() {
+            if (!parkingLot) {
+                log('Please initialize the system first', 'error');
+                return;
+            }
+
+            const laneNum = parseInt(document.getElementById('removeLane').value);
+            const carId = document.getElementById('findCarId').value.trim();
+
+            if (isNaN(laneNum) || laneNum < 1 || laneNum > parkingLot.stacks.length) {
+                log('Invalid lane number', 'error');
+                return;
+            }
+
+            if (!carId) {
+                log('Please enter a car ID', 'error');
+                return;
+            }
+
+            const stack = parkingLot.stacks[laneNum - 1];
+            const pos = stack.findCar(carId);
+
+            if (pos === -1) {
+                log(`Car ${carId} not found in lane ${laneNum}`, 'error');
+                return;
+            }
+
+            if (pos !== 1) {
+                log(`Car ${carId} is not at the top (position ${pos}). Cannot remove`, 'error');
+                return;
+            }
+
+            stack.pop();
+            log(`Car ${carId} removed from lane ${laneNum}`, 'success');
+            updateView();
+        }
+
+        function sortStack() {
+            if (!parkingLot) {
+                log('Please initialize the system first', 'error');
+                return;
+            }
+
+            const laneNum = parseInt(document.getElementById('sortLane').value);
+            if (isNaN(laneNum) || laneNum < 1 || laneNum > parkingLot.stacks.length) {
+                log('Invalid lane number', 'error');
+                return;
+            }
+
+            parkingLot.stacks[laneNum - 1].sort();
+            log(`Lane ${laneNum} sorted using Merge Sort`, 'success');
+            updateView();
+        }
+
+        function moveStack() {
+            if (!parkingLot) {
+                log('Please initialize the system first', 'error');
+                return;
+            }
+
+            const fromLane = parseInt(document.getElementById('fromLane').value);
+            const toLane = parseInt(document.getElementById('toLane').value);
+
+            if (isNaN(fromLane) || fromLane < 1 || fromLane > parkingLot.stacks.length ||
+                isNaN(toLane) || toLane < 1 || toLane > parkingLot.stacks.length) {
+                log('Invalid lane numbers', 'error');
+                return;
+            }
+
+            if (fromLane === toLane) {
+                log('Cannot move stack to itself', 'error');
+                return;
+            }
+
+            const source = parkingLot.stacks[fromLane - 1];
+            if (source.isEmpty()) {
+                log(`Lane ${fromLane} is already empty`, 'info');
+                return;
+            }
+
+            const tempCars = [];
+            while (!source.isEmpty()) {
+                tempCars.push(source.pop());
+            }
+            tempCars.reverse();
+
+            let currentLane = toLane - 1;
+            let movedCount = 0;
+            let removedCount = 0;
+
+            for (let car of tempCars) {
+                let placed = false;
+                while (currentLane < parkingLot.stacks.length && !placed) {
+                    const target = parkingLot.stacks[currentLane];
+                    if (!target.isFull()) {
+                        target.push(car);
+                        log(`Car ${car.id} moved from lane ${fromLane} to lane ${currentLane + 1}`, 'info');
+                        movedCount++;
+                        placed = true;
+                    } else {
+                        currentLane++;
+                    }
+                }
+
+                if (!placed) {
+                    log(`Car ${car.id} cannot be moved (no space). Removed from system`, 'error');
+                    removedCount++;
+                }
+            }
+
+            log(`Move completed: ${movedCount} cars moved, ${removedCount} cars removed. Lane ${fromLane} is now empty`, 'success');
+            updateView();
+        }
+        updateView();
+    </script>
+</body>
+
+</html>

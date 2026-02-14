@@ -24,6 +24,7 @@ bool ParkingManager::addCar()
         return false;
     }
 
+    // all line is full 
     if (!lot->parkCarInFirstAvailable(car))
     {
         std::cout << "Parking Lot is FULL. Returning car " << car->getId() << " to front of queue.\n";

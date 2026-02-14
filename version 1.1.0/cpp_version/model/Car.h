@@ -1,9 +1,13 @@
 // model/Car.h
+
 #pragma once
+
 #include <string>
 
 class Car
+
 {
+
 private:
     std::string carId;
 
@@ -15,12 +19,16 @@ public:
     const std::string &getId() const noexcept { return carId; } // O(1)
 
     bool operator<(const Car &other) const noexcept // O(n)
+
     {
+
         return carId < other.carId;
     }
 
     bool operator==(const Car &other) const noexcept // O(n)
+
     {
+
         return carId == other.carId;
     }
 };
